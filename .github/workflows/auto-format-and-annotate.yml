@@ -50,7 +50,7 @@ jobs:
       - name: Create new branch, commit, push, and open PR into staging
         if: steps.git_status.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
@@ -62,9 +62,12 @@ jobs:
           git add -A
           git commit -m "Auto-format + add complexity annotations"
 
-          git push origin "$BRANCH"
+          # Push using PAT
+          git push https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} "$BRANCH"
 
           # Create pull request into staging
+          gh auth login --with-token <<< "${GH_TOKEN}"
+
           gh pr create \
             --base staging \
             --head "$BRANCH" \
