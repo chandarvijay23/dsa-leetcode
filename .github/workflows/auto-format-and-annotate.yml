@@ -2,7 +2,7 @@ name: Auto Format & Annotate
 
 on:
   push:
-    branches: ["staging"]   # <-- workflow runs ONLY when staging changes
+    branches: ["staging"] 
 
 permissions:
   contents: write
@@ -32,10 +32,10 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
-      - name: Format code
+      - name: Format code with Black
         run: black .
 
-      - name: Annotate complexity
+      - name: Annotate Python files with complexity comments
         run: python .github/scripts/annotate_complexity.py
 
       - name: Check for changes
@@ -47,7 +47,7 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit back to staging
+      - name: Commit changes back to staging
         if: steps.git_status.outputs.changed == 'true'
         run: |
           git config user.name "GitHub Actions"
@@ -55,16 +55,20 @@ jobs:
 
           git add -A
           git commit -m "Auto-format + complexity annotations"
-          git push origin staging   # <-- safe push — staging is not protected
+          git push origin staging
 
       - name: Create PR into main
         if: steps.git_status.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}   
         run: |
-          gh auth login --with-token <<< "${GH_TOKEN}"
-          gh pr create \
-            --base main \
-            --head staging \
-            --title "Automated Code Formatting & Complexity Annotations" \
-            --body "This PR includes automatic formatting and complexity annotations."
+          # If a PR already exists, don't create another
+          if gh pr list --base main --head staging --state open --json number | grep -q "number"; then
+            echo "PR from staging to main already exists. Skipping PR creation."
+          else
+            gh pr create \
+              --base main \
+              --head staging \
+              --title "Automated Code Formatting & Complexity Annotations" \
+              --body "This PR includes automatic formatting and complexity annotations."
+          fi
