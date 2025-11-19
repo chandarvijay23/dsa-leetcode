@@ -4,6 +4,10 @@ on:
   push:
     branches: ["main"]
 
+permissions:
+  contents: write           
+  pull-requests: write 
+
 jobs:
   format_and_pr:
     runs-on: ubuntu-latest
@@ -67,4 +71,3 @@ jobs:
             --title "Automated Code Formatting & Complexity Annotations" \
             --body "This PR includes automatic formatting + complexity annotations."
           true
-          
