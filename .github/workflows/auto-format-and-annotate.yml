@@ -5,11 +5,10 @@ on:
     branches: ["main"]
 
 permissions:
-  contents: write           
-  pull-requests: write 
+  contents: write
 
 jobs:
-  format_and_pr:
+  format_and_push:
     runs-on: ubuntu-latest
 
     steps:
@@ -32,10 +31,10 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
-      - name: Format code with Black
+      - name: Format code
         run: black .
 
-      - name: Annotate Python files with complexity comments
+      - name: Annotate complexity
         run: python .github/scripts/annotate_complexity.py
 
       - name: Check for changes
@@ -47,31 +46,17 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create new branch, commit, push, and open PR into staging
+      - name: Commit + push to main AND staging
         if: steps.git_status.outputs.changed == 'true'
-        env:
-          MY_PAT: ${{ secrets.PAT_TOKEN }}
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-          # Create new branch
-          BRANCH="auto-update-$(date +%s)"
-          git checkout -b "$BRANCH"
-
           git add -A
-          git commit -m "Auto-format + add complexity annotations"
+          git commit -m "Auto-format + complexity annotations"
 
-          # Push using PAT
-          git push https://x-access-token:${MY_PAT}@github.com/${{ github.repository }} "$BRANCH"
+          # Push to main
+          git push origin main
 
-          # Create pull request into staging
-          gh auth login --with-token <<< "${MY_PAT}"
-
-          gh pr create \
-            --base staging \
-            --head "$BRANCH" \
-            --title "Automated Code Formatting & Complexity Annotations" \
-            --body "This PR includes automatic formatting + complexity annotations."
-          true
-          
+          # Also push to staging
+          git push origin main:staging
