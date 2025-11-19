@@ -2,7 +2,7 @@ name: Auto Format & Annotate
 
 on:
   push:
-    branches: ["staging"] 
+    branches: ["staging"]
 
 permissions:
   contents: write
@@ -24,7 +24,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install black
           pip install google-genai
 
       - name: Set Gemini API Key
@@ -32,10 +31,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
-      - name: Format code with Black
-        run: black .
-
-      - name: Annotate Python files with complexity comments
+      - name: Annotate Python files (full rewrite)
         run: python .github/scripts/annotate_complexity.py
 
       - name: Check for changes
@@ -54,21 +50,20 @@ jobs:
           git config user.email "actions@github.com"
 
           git add -A
-          git commit -m "Auto-format + complexity annotations"
+          git commit -m "Gemini reformatted + complexity annotations"
           git push origin staging
 
       - name: Create PR into main
         if: steps.git_status.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}   
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          # If a PR already exists, don't create another
           if gh pr list --base main --head staging --state open --json number | grep -q "number"; then
-            echo "PR from staging to main already exists. Skipping PR creation."
+            echo "PR from staging to main already exists. Skipping."
           else
             gh pr create \
               --base main \
               --head staging \
-              --title "Automated Code Formatting & Complexity Annotations" \
-              --body "This PR includes automatic formatting and complexity annotations."
+              --title "Gemini Format + Complexity Annotations" \
+              --body "Automatically reformatted and annotated using Gemini."
           fi
