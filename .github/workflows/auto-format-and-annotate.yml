@@ -2,13 +2,14 @@ name: Auto Format & Annotate
 
 on:
   push:
-    branches: ["main"]
+    branches: ["staging"]   # <-- workflow runs ONLY when staging changes
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
-  format_and_push:
+  format_and_pr:
     runs-on: ubuntu-latest
 
     steps:
@@ -46,7 +47,7 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit + push to main AND staging
+      - name: Commit back to staging
         if: steps.git_status.outputs.changed == 'true'
         run: |
           git config user.name "GitHub Actions"
@@ -54,9 +55,16 @@ jobs:
 
           git add -A
           git commit -m "Auto-format + complexity annotations"
+          git push origin staging   # <-- safe push — staging is not protected
 
-          # Push to main
-          git push origin main
-
-          # Also push to staging
-          git push origin main:staging
+      - name: Create PR into main
+        if: steps.git_status.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          gh auth login --with-token <<< "${GH_TOKEN}"
+          gh pr create \
+            --base main \
+            --head staging \
+            --title "Automated Code Formatting & Complexity Annotations" \
+            --body "This PR includes automatic formatting and complexity annotations."
