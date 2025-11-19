@@ -18,5 +18,5 @@ class Solution:
                 r -= 1
                 rmax = max(rmax, height[r])
                 result += rmax - height[r]
-            
+
         return result

@@ -4,10 +4,11 @@ class Solution:
             return False
         counts = [0] * 26
         for i in range(len(s)):
-            counts[ord(s[i]) - ord('a')] += 1
-            counts[ord(t[i]) - ord('a')] -= 1
-        
+            counts[ord(s[i]) - ord("a")] += 1
+            counts[ord(t[i]) - ord("a")] -= 1
+
         return all(c == 0 for c in counts)
+
 
 # Time complexity o(n)
 # Space Complexity O(1) #array size fixed to length = 26

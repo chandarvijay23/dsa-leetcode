@@ -1,7 +1,7 @@
 class Solution:
     def isValid(self, s: str) -> bool:
         parantheses_stack = []
-        d = {')':'(', ']':'[', '}':'{'}
+        d = {")": "(", "]": "[", "}": "{"}
         for i in s:
             if i in d.values():
                 parantheses_stack.append(i)
@@ -11,4 +11,4 @@ class Solution:
                 else:
                     return False
 
-        return (len(parantheses_stack) == 0)
+        return len(parantheses_stack) == 0

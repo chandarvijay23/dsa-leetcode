@@ -8,5 +8,5 @@ class Solution:
                 temperature, index = stack.pop()
                 output[index] = i - index
             stack.append((value, i))
-        
+
         return output

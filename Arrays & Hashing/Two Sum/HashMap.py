@@ -3,5 +3,5 @@ class Solution:
         d = {}
         for i, num in enumerate(nums):
             if target - num in d:
-                return [i, d[target-num]]
+                return [i, d[target - num]]
             d[num] = i

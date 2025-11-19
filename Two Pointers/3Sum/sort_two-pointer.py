@@ -4,7 +4,7 @@ class Solution:
         nums.sort()
 
         for i, value in enumerate(nums):
-            if i > 0 and value == nums[i-1]:
+            if i > 0 and value == nums[i - 1]:
                 continue
             else:
                 l = i + 1
@@ -17,6 +17,6 @@ class Solution:
                     else:
                         result.append([value, nums[l], nums[r]])
                         l += 1
-                        while nums[l] == nums [l - 1] and l < r:
+                        while nums[l] == nums[l - 1] and l < r:
                             l += 1
         return result

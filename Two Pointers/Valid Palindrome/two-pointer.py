@@ -12,8 +12,10 @@ class Solution:
             l += 1
             r -= 1
         return True
-    
-    def alphanum(self, c:str):
-        return (ord("a") <= ord(c) <= ord("z") or
-                ord("A") <= ord(c) <= ord("Z") or 
-                ord("0") <= ord(c) <= ord("9"))
+
+    def alphanum(self, c: str):
+        return (
+            ord("a") <= ord(c) <= ord("z")
+            or ord("A") <= ord(c) <= ord("Z")
+            or ord("0") <= ord(c) <= ord("9")
+        )

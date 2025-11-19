@@ -6,5 +6,6 @@ class Solution:
                 return True
         return False
 
+
 # Time complexity o(nlogn)
 # Space Complexity O(1)
