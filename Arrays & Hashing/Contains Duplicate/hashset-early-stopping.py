@@ -1,5 +1,11 @@
 class Solution:
     def containsDuplicate(self, nums: List[int]) -> bool:
+        # Time Complexity (Best): O(1)
+        # Time Complexity (Average): O(n)
+        # Time Complexity (Worst): O(n)
+        # Space Complexity (Best): O(1)
+        # Space Complexity (Average): O(n)
+        # Space Complexity (Worst): O(n)
         seen = set()
         for i in nums:
             if i in seen:
@@ -7,7 +13,3 @@ class Solution:
             else:
                 seen.add(i)
         return False
-
-# Time complexity o(n)
-# Space Complexity O(n) (worst case)
-# Space Complexity O(1) (best case)
