@@ -1,0 +1,45 @@
+name: Auto Format & Annotate
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.1"
+
+      - name: Install dependencies
+        run: |
+          pip install black
+          pip install google-genai
+
+      - name: Set Gemini API Key
+        run: echo "GEMINI_API_KEY=$GEMINI_API_KEY" >> $GITHUB_ENV
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - name: Format code with Black
+        run: black .
+
+      - name: Annotate Python files with complexity comments
+        run: python .github/scripts/annotate_complexity.py
+
+      - name: Commit changes if any
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto-format + add time/space complexity annotations"
+          commit_user_name: GitHub Actions
+          commit_user_email: actions@github.com
+          push_options: "--force"
