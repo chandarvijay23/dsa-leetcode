@@ -1,0 +1,69 @@
+name: Auto Format & Annotate
+
+on:
+  push:
+    branches: ["staging"]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  format_and_pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.1"
+
+      - name: Install dependencies
+        run: pip install google-genai
+
+      - name: Export Gemini API Key
+        run: echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> $GITHUB_ENV
+
+      - name: Run complexity annotation
+        env:
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: python .github/scripts/annotate_complexity.py
+
+      - name: Check for changes
+        id: git_status
+        run: |
+          if [[ -z $(git status --porcelain) ]]; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit changes back to staging
+        if: steps.git_status.outputs.changed == 'true'
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          git add -A
+          git commit -m "Auto complexity annotations"
+          git push origin staging
+
+      - name: Create PR into main
+        if: steps.git_status.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          if gh pr list --base main --head staging --state open --json number | grep -q "number"; then
+            echo "PR from staging to main exists."
+          else
+            gh pr create \
+              --base main \
+              --head staging \
+              --title "Automated Complexity Annotations" \
+              --body "This PR contains automatically generated complexity annotations."
+          fi
