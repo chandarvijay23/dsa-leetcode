@@ -17,4 +17,3 @@ class Solution:
                 else:
                     l = m + 1
         return -1
-        
